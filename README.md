@@ -329,7 +329,8 @@ Ideias futuras (não implementadas):
 
 ## 📄 Licença
 
-Projeto de uso pessoal. Sinta-se livre pra fazer fork e adaptar à sua realidade.
+Distribuído sob a [Licença MIT](LICENSE). Sinta-se livre pra fazer fork, adaptar à sua realidade
+e usar como referência — só mantenha o crédito.
 
 ---
 
