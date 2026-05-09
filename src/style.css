@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-base: #0F1023;
+  --surface-base: #2D2E47;
+  --surface-deep: #1A1B36;
+  --text-base: #E5E7F0;
+  --text-muted: #8E94B0;
+  --border-color: rgba(62, 121, 150, 0.18);
+  --border-color-strong: rgba(62, 121, 150, 0.4);
+  --glass-bg: linear-gradient(135deg, rgba(45, 46, 71, 0.85), rgba(26, 27, 54, 0.6));
+  --legend-pill-bg: rgba(45, 46, 71, 0.6);
+}
+
+.v-theme--flux-light {
+  --bg-base: #F0F4F8;
+  --surface-base: #FFFFFF;
+  --surface-deep: #E5E9EF;
+  --text-base: #1A1B36;
+  --text-muted: #5C6480;
+  --border-color: rgba(62, 121, 150, 0.22);
+  --border-color-strong: rgba(62, 121, 150, 0.5);
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(240, 244, 248, 0.7));
+  --legend-pill-bg: rgba(229, 233, 239, 0.6);
+}
+
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-base);
+  color: var(--text-base);
+}
+
+.v-application {
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+.text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-h6,
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif !important;
+  letter-spacing: -0.02em !important;
+  font-weight: 600 !important;
+}
+
+.app-bg {
+  background:
+    radial-gradient(ellipse 80% 50% at 80% -10%, rgba(0, 186, 180, 0.15), transparent),
+    radial-gradient(ellipse 60% 50% at 0% 100%, rgba(6, 158, 110, 0.1), transparent),
+    var(--bg-base);
+  min-height: 100vh;
+}
+
+.glass-card {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Modo privacidade — esconde valores monetários com blur */
+body.privacy-mode .money-value {
+  filter: blur(7px) saturate(0.6);
+  transition: filter 0.2s ease;
+  user-select: none;
+  cursor: not-allowed;
+}
+body:not(.privacy-mode) .money-value {
+  transition: filter 0.2s ease;
+}
+
+.glow-primary {
+  box-shadow: 0 0 24px rgba(0, 186, 180, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: #3E7996;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00BAB4;
+}

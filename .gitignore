@@ -1,0 +1,122 @@
+# ────────────────────────────────────────────
+# Dependencies
+# ────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ────────────────────────────────────────────
+# Build / output
+# ────────────────────────────────────────────
+dist/
+dist-ssr/
+build/
+*.tsbuildinfo
+
+# Vite
+.vite/
+
+# PWA gerados
+dev-dist/
+sw.js
+workbox-*.js
+
+# ────────────────────────────────────────────
+# Variáveis de ambiente (SENSÍVEL)
+# ────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.production.local
+
+# Apenas .env.example deve ser commitado
+!.env.example
+
+# ────────────────────────────────────────────
+# Firebase (SENSÍVEL — service accounts/credenciais)
+# ────────────────────────────────────────────
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+*-debug.log
+firebase-export-*/
+
+# Service account JSONs (NUNCA commitar)
+*serviceAccount*.json
+*service-account*.json
+firebase-adminsdk-*.json
+google-services.json
+GoogleService-Info.plist
+
+# ────────────────────────────────────────────
+# Editor / IDE / AI assistants
+# ────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+.idea/
+.claude/
+.cursor/
+.windsurf/
+*.swp
+*.swo
+*.sw?
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ────────────────────────────────────────────
+# Sistema operacional
+# ────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ────────────────────────────────────────────
+# Logs
+# ────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+lerna-debug.log.*
+
+# ────────────────────────────────────────────
+# Cache
+# ────────────────────────────────────────────
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# ────────────────────────────────────────────
+# Coverage / testes
+# ────────────────────────────────────────────
+coverage/
+*.lcov
+.nyc_output/
+
+# ────────────────────────────────────────────
+# Outros
+# ────────────────────────────────────────────
+*.local
+.env.backup
+*.pem
+*.key
+*.crt
+
+# Backup files
+*.bak
+*.backup
+*~
