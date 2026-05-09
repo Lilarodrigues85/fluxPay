@@ -7,6 +7,7 @@ import { useCategoriesStore } from '../../stores/categories'
 import { useBudgetsStore } from '../../stores/budgets'
 import { useToastStore } from '../../stores/toast'
 import { formatCurrency } from '../../utils/currency'
+import { findTransactionDuplicate } from '../../utils/duplicates'
 import { dateToInputValue, inputValueToTimestamp } from '../../utils/dates'
 import type { Transaction } from '../../types'
 
@@ -42,11 +43,14 @@ const dueDate = ref(dateToInputValue(Date.now()))
 const status = ref<'pending' | 'paid'>('pending')
 const projectId = ref<string | null>(null)
 const notes = ref('')
+const tags = ref<string[]>([])
 const isRecurring = ref(false)
 const recurringFrequency = ref<'weekly' | 'monthly' | 'yearly'>('monthly')
 const recurringTotal = ref<number>(12)
 const isSaving = ref(false)
 const error = ref<string | null>(null)
+const duplicateConfirmed = ref(false)
+const duplicateOpen = ref(false)
 
 const categories = computed(() =>
   props.type === 'payable'
@@ -71,6 +75,7 @@ watch(isOpen, (open) => {
       status.value = props.transaction.status === 'paid' ? 'paid' : 'pending'
       projectId.value = props.transaction.projectId
       notes.value = props.transaction.notes
+      tags.value = props.transaction.tags ? [...props.transaction.tags] : []
       isRecurring.value = false  // edição não cria nova série
     } else {
       description.value = ''
@@ -80,6 +85,7 @@ watch(isOpen, (open) => {
       status.value = 'pending'
       projectId.value = null
       notes.value = ''
+      tags.value = []
       isRecurring.value = false
       recurringFrequency.value = 'monthly'
       recurringTotal.value = 12
@@ -95,6 +101,19 @@ const handleSave = async () => {
     return
   }
 
+  // Detecção de duplicidade (só ao criar, não ao editar)
+  if (!props.transaction && !duplicateConfirmed.value) {
+    const dup = findTransactionDuplicate(txStore.transactions, {
+      description: description.value,
+      amount: amount.value,
+      date: inputValueToTimestamp(dueDate.value),
+    })
+    if (dup) {
+      duplicateOpen.value = true
+      return
+    }
+  }
+
   isSaving.value = true
   error.value = null
   try {
@@ -108,6 +127,7 @@ const handleSave = async () => {
       paidAt: status.value === 'paid' ? Date.now() : null,
       projectId: projectId.value,
       notes: notes.value,
+      tags: tags.value.length > 0 ? tags.value : [],
     }
 
     // Alerta se ultrapassa orçamento (apenas em criação de payable)
@@ -146,7 +166,19 @@ const handleSave = async () => {
     toast.error('Erro ao salvar: ' + (err as Error).message)
   } finally {
     isSaving.value = false
+    duplicateConfirmed.value = false
   }
+}
+
+function confirmDuplicate() {
+  duplicateConfirmed.value = true
+  duplicateOpen.value = false
+  handleSave()
+}
+
+function cancelDuplicate() {
+  duplicateOpen.value = false
+  duplicateConfirmed.value = false
 }
 </script>
 
@@ -213,6 +245,16 @@ const handleSave = async () => {
             class="mb-2"
           />
 
+          <v-combobox
+            v-model="tags"
+            label="Tags (digite e tecle Enter)"
+            multiple
+            chips
+            closable-chips
+            class="mb-2"
+            prepend-inner-icon="mdi-tag-multiple-outline"
+          />
+
           <v-textarea
             v-model="notes"
             label="Observações"
@@ -275,6 +317,30 @@ const handleSave = async () => {
         <v-spacer />
         <v-btn @click="isOpen = false">Cancelar</v-btn>
         <v-btn color="primary" :loading="isSaving" @click="handleSave">Salvar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="duplicateOpen" max-width="460" persistent>
+    <v-card class="glass-card">
+      <v-card-title class="d-flex align-center pa-4">
+        <v-icon color="warning" class="mr-2">mdi-content-copy</v-icon>
+        Possível duplicidade
+      </v-card-title>
+      <v-card-text>
+        <p class="text-body-2 mb-2">
+          Já existe uma transação <strong>"{{ description }}"</strong> com o mesmo valor de
+          <strong class="font-mono">{{ formatCurrency(amount || 0) }}</strong> e mesma data,
+          criada nos últimos 5 minutos.
+        </p>
+        <p class="text-body-2" style="color: var(--text-muted)">
+          Pode ser um clique acidental. Quer criar mesmo assim?
+        </p>
+      </v-card-text>
+      <v-card-actions class="pa-4">
+        <v-spacer />
+        <v-btn variant="text" @click="cancelDuplicate">Cancelar</v-btn>
+        <v-btn color="warning" @click="confirmDuplicate">Criar mesmo assim</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

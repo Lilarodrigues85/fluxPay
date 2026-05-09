@@ -7,6 +7,7 @@ import ReceivableView from '../views/ReceivableView.vue'
 import ExpensesView from '../views/ExpensesView.vue'
 import ProjectsView from '../views/ProjectsView.vue'
 import SavingsView from '../views/SavingsView.vue'
+import InsightsView from '../views/InsightsView.vue'
 import SettingsView from '../views/SettingsView.vue'
 
 const routes = [
@@ -42,6 +43,11 @@ const routes = [
   {
     path: '/patrimonio',
     component: SavingsView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/analise',
+    component: InsightsView,
     meta: { requiresAuth: true },
   },
   {

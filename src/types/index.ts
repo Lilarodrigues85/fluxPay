@@ -28,6 +28,7 @@ export interface Transaction {
   } | null
   projectId: string | null
   notes: string
+  tags?: string[]
   createdAt: number
   updatedAt: number
 }
@@ -106,6 +107,7 @@ export interface Expense {
   date: number
   paymentMethod: string
   notes: string
+  tags?: string[]
   createdAt: number
   updatedAt: number
 }

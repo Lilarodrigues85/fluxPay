@@ -67,6 +67,21 @@ const categoryColor = (cat: string) => {
     items-per-page-text="Linhas por página"
     class="flux-table"
   >
+    <template #[`item.description`]="{ item }">
+      <div class="d-flex align-center flex-wrap" style="gap: 4px">
+        <span>{{ item.description }}</span>
+        <v-chip
+          v-for="tag in item.tags || []"
+          :key="tag"
+          size="x-small"
+          variant="outlined"
+          class="tag-chip"
+        >
+          #{{ tag }}
+        </v-chip>
+      </div>
+    </template>
+
     <template #[`item.date`]="{ item }">
       <span style="color: #B6BBD0">{{ formatDate(item.date) }}</span>
     </template>
@@ -136,5 +151,13 @@ const categoryColor = (cat: string) => {
 .font-mono {
   font-family: 'Space Grotesk', monospace;
   font-feature-settings: 'tnum';
+}
+
+.tag-chip {
+  font-size: 0.65rem !important;
+  height: 18px !important;
+  opacity: 0.75;
+  border-color: rgba(0, 186, 180, 0.4) !important;
+  color: #00BAB4 !important;
 }
 </style>

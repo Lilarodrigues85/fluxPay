@@ -53,6 +53,7 @@ const navItems = [
   { title: 'Gastos avulsos', icon: 'mdi-cart-outline', path: '/gastos-avulsos' },
   { title: 'Patrimônio', icon: 'mdi-cash', path: '/patrimonio' },
   { title: 'Metas', icon: 'mdi-flag-checkered', path: '/metas' },
+  { title: 'Análise', icon: 'mdi-chart-box-outline', path: '/analise' },
   { title: 'Configurações', icon: 'mdi-tune-variant', path: '/configuracoes' },
 ]
 

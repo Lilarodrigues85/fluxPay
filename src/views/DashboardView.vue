@@ -7,6 +7,7 @@ import NetWorthCard from '../components/dashboard/NetWorthCard.vue'
 import CheckingCard from '../components/dashboard/CheckingCard.vue'
 import PaymentStatusDonut from '../components/dashboard/PaymentStatusDonut.vue'
 import BudgetsCard from '../components/dashboard/BudgetsCard.vue'
+import HealthScoreMini from '../components/insights/HealthScoreMini.vue'
 </script>
 
 <template>
@@ -22,11 +23,14 @@ import BudgetsCard from '../components/dashboard/BudgetsCard.vue'
       <SummaryCards class="mb-6" />
 
       <v-row>
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="4">
           <CheckingCard />
         </v-col>
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="4">
           <NetWorthCard />
+        </v-col>
+        <v-col cols="12" md="4">
+          <HealthScoreMini />
         </v-col>
       </v-row>
 

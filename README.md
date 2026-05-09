@@ -10,8 +10,9 @@
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8?logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-00BAB4.svg)](LICENSE)
 
-Um app de finanças pessoais com visual cyberpunk pra acompanhar contas a pagar, contas a receber, gastos avulsos, patrimônio guardado e metas de projetos. Tudo num único usuário, com login Google e dados na sua própria conta Firebase.
+App de finanças pessoais com visual cyberpunk, score de saúde financeira, sugestões automáticas e tudo dentro do plano gratuito do Firebase.
 
 </div>
 
@@ -20,57 +21,91 @@ Um app de finanças pessoais com visual cyberpunk pra acompanhar contas a pagar,
 ## ✨ O que ele faz
 
 ### 📊 Dashboard
+
 - **Resumo do mês** com 4 cards (a pagar, a receber, saldo, vencidas) com **mini sparklines** dos próximos 6 meses
-- **Dinheiro do mês vigente** — saldo somado das suas contas correntes
-- **Patrimônio guardado** — total investido (CDB, Tesouro, Poupança, Ações, Cripto, etc)
+- **Dinheiro do mês vigente** — saldo somado das contas correntes
+- **Patrimônio guardado** — total investido (CDB, Tesouro, Poupança, Ações, Cripto, etc.)
+- **Mini score de saúde financeira** — 0–100 num gauge, clicável pra ver o detalhe
 - **Gráfico de fluxo** dos próximos 6 meses (linha com gradient + glow + crosshair) com animação progressiva
 - **Donut futurista** de pago vs pendente vs vencido
-- **Orçamentos** — top 5 categorias com progresso e status
+- **Top 5 orçamentos** com progresso e status
 - **Próximos vencimentos** dos próximos 6 meses
 
+### 🧠 Análise (nova)
+
+Página dedicada `/analise` com:
+
+- **Score de saúde financeira** num gauge SVG circular grande, com breakdown dos 5 fatores avaliados:
+  - Reserva de emergência (até 25 pts)
+  - Saldo do mês (até 20 pts)
+  - Pagamentos em dia (até 15 pts)
+  - Orçamentos respeitados (até 20 pts)
+  - Tendência do patrimônio (até 20 pts)
+  - Classificação: **Crítico** (0-30) → **Atenção** (31-60) → **Bom** (61-80) → **Excelente** (81-100)
+- **Comparativo mês a mês** — receber, pagar, gastos e saldo com seta de tendência e % de variação (cor inteligente: receita subindo = verde, gastos subindo = vermelho)
+- **Top 5 maiores gastos do mês** — une gastos avulsos + contas a pagar, ranqueado por valor
+- **Sugestões e alertas** baseados em padrões:
+  - "Categoria X disparou" se aumentou ≥25% vs mês passado
+  - "Maior fatia: Y" quando uma categoria pega ≥30% dos gastos
+  - "Orçamento estourado" com diferença em R$
+  - "Está gastando menos" se gastos caíram ≥10%
+  - "Saldo do mês negativo" com valor exato
+  - "Construa sua reserva" se reserva de emergência baixa
+
 ### 💰 Contas a pagar e a receber
+
 - CRUD completo com filtro por status
 - Categorias customizáveis ou predefinidas
 - Vinculação opcional a uma meta
-- **Recorrência automática**: cria 1 a 60 ocorrências (semanal, mensal, anual) num clique
+- **Recorrência automática**: cria 1 a 60 ocorrências (semanal, mensal, anual) num clique, com indicador 🔁 na lista e opção "excluir série inteira"
+- **Tags livres** além de categoria — combobox com chips, exibidas como `#tag` na lista
+- **Detecção de duplicidade**: alerta ao salvar lançamento idêntico criado nos últimos 5 min (descrição + valor + data)
 - Marcar como pago/recebido com 1 toque
 - Indicadores visuais de status com chips coloridos
-- Exportação Excel (.xlsx) ou CSV com filtro de período
+- Importação e exportação Excel (.xlsx) ou CSV com filtro de período
 
 ### 🛒 Gastos avulsos
-- Registro rápido de despesas do dia a dia (almoço, Uber, mercado, etc)
+
+- Registro rápido de despesas do dia a dia (almoço, Uber, mercado, etc.)
 - 3 cards de stats: gasto do mês, hoje, média diária
 - **Hero da conta corrente** com saldo + estimativa após gastos
-- 11 categorias predefinidas com cores próprias (Alimentação, Mercado, Transporte, Saúde, Educação, etc)
+- 11 categorias predefinidas com cores próprias (Alimentação, Mercado, Transporte, Saúde, Educação, etc.)
+- Tags livres + detecção de duplicidade
 
 ### 🏦 Patrimônio
+
 - Cadastro de aplicações por tipo: Conta Corrente, Poupança, CDB/RDB/LCI, Tesouro, Fundos, Ações, Cripto, Espécie
 - Hero com total investido em gradient + barra de distribuição por tipo
 - Rendimento (% a.a.) opcional por aplicação
-- **Gráfico de evolução** mês a mês (snapshots automáticos)
+- **Gráfico de evolução** mês a mês — snapshots automáticos do patrimônio (criados na primeira visita do mês)
 
 ### 🎯 Metas de projetos
+
 - Cadastre objetivos (viagem, reserva, troca de carro) com valor alvo + prazo
 - Vincule transações à meta — o progresso é calculado automaticamente
 - Trilho de progresso glow com bolinha pulsante
 - Customize cor + ícone
 
 ### 📈 Orçamento por categoria
+
 - Limite mensal por categoria (gastos avulsos, contas a pagar ou ambos)
 - Indicador visual: 0–70% verde, 70–100% laranja, >100% vermelho
 - **Toast de alerta** ao registrar lançamento que ultrapassa o limite
 - Widget no Dashboard com top 5 mais consumidos
 
 ### ⚙ Outras features
+
 - 🌗 **Tema claro / escuro / sistema** (segue preferência do SO)
 - 👁 **Modo privacidade** — botão olho borra todos os valores monetários
 - 📅 **Dia de início do mês personalizável** (alinha com salário)
-- 🔄 **Importar CSV** com preview de validação
-- 📥 **Exportar tudo em Excel** (.xlsx multi-aba) ou ZIP de CSVs
+- 📥 **Exportar tudo em Excel** (.xlsx multi-aba) ou ZIP de CSVs com filtro de período
+- 📤 **Importar CSV** com preview de validação
 - 🏷 **Categorias customizadas** (cor + ícone próprios)
 - 🗑 **Limpar dados** ou **excluir conta** com confirmação dupla + re-auth
 - 📱 **PWA instalável** com service worker e funcionamento offline
+- 📲 **FAB de "novo"** flutuante em mobile, contextual à tela atual
 - 🔔 **Toast notifications** pra todas as ações
+- 💀 **Skeleton loaders** durante carregamento
 
 ---
 
@@ -86,7 +121,7 @@ Um app de finanças pessoais com visual cyberpunk pra acompanhar contas a pagar,
 | **Auth** | Firebase Authentication (Google Sign-In) |
 | **Database** | Cloud Firestore (subcoleções por usuário) |
 | **Hosting** | Firebase Hosting |
-| **Charts** | Chart.js + vue-chartjs (linhas, donut, sparklines SVG) |
+| **Charts** | Chart.js + vue-chartjs (linhas, donut, sparklines SVG, gauge) |
 | **Datas** | date-fns |
 | **Export** | ExcelJS + JSZip (lazy-load) |
 | **PWA** | vite-plugin-pwa (Workbox) |
@@ -105,9 +140,10 @@ Tema "flux" inspirado em dashboards cyberpunk:
 | Primary (CTAs, ativos) | `#00BAB4` (turquesa) |
 | Success (recebido / pago) | `#069E6E` (esmeralda) |
 | Accent | `#3E7996` / `#2F6C82` (azul aço / petróleo) |
+| Warning | `#F4A261` (âmbar) |
 | Error / despesa | `#FF4D6D` (rosa coral) |
 
-Efeitos visuais: glassmorphism com `backdrop-filter`, gradientes radiais ambientes nos cantos, glow nos cards e nos charts, números em monoespaçada Space Grotesk com `font-feature-settings: 'tnum'`.
+Efeitos visuais: glassmorphism com `backdrop-filter`, gradientes radiais ambientes nos cantos, glow nos cards e charts, números em monoespaçada Space Grotesk com `font-feature-settings: 'tnum'`.
 
 ---
 
@@ -122,8 +158,8 @@ Efeitos visuais: glassmorphism com `backdrop-filter`, gradientes radiais ambient
 ### 1. Clone e instale
 
 ```bash
-git clone https://github.com/SEU_USUARIO/fluxpay.git
-cd fluxpay
+git clone https://github.com/Lilarodrigues85/fluxPay.git
+cd fluxPay
 npm install
 ```
 
@@ -145,7 +181,7 @@ cp .env.example .env.local
 
 Edite `.env.local` com seus valores:
 
-```
+```bash
 VITE_FIREBASE_API_KEY=AIza...
 VITE_FIREBASE_AUTH_DOMAIN=seu-projeto.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=seu-projeto
@@ -208,39 +244,43 @@ Após o deploy, o app fica disponível em `https://seu-projeto.web.app`.
 
 ## 📂 Estrutura do projeto
 
-```
+```text
 fluxPay/
-├── public/                     # ícones PWA + favicon
+├── public/                        # ícones PWA + favicon
 ├── src/
 │   ├── components/
-│   │   ├── common/             # AppToast, ExportDialog, ImportDialog, Sparkline
-│   │   ├── layout/             # AppLayout (AppBar + NavigationDrawer + FAB mobile)
-│   │   ├── dashboard/          # SummaryCards, CashflowChart, BudgetsCard, NetWorthCard,
-│   │   │                       # CheckingCard, PaymentStatusDonut, UpcomingList
-│   │   ├── transactions/       # TransactionDialog (com recorrência), TransactionTable
-│   │   ├── expenses/           # ExpenseDialog, ExpenseTable
-│   │   ├── savings/            # SavingsDialog, SavingsCard, NetWorthHistory
-│   │   ├── projects/           # ProjectDialog, ProjectCard
-│   │   └── settings/           # CategoriesManager, BudgetsManager
-│   ├── views/                  # Login, Dashboard, Payable, Receivable, Expenses,
-│   │                           # Savings, Projects, Settings
-│   ├── stores/                 # auth, transactions, expenses, savings, projects,
-│   │                           # categories, budgets, snapshots, preferences, toast
-│   ├── services/               # firebase config + Firestore CRUD por entidade
-│   ├── types/                  # interfaces TypeScript
-│   ├── utils/                  # currency, dates, savings, exportExcel, importCsv
-│   ├── plugins/                # vuetify (tema flux + flux-light)
-│   ├── router/                 # rotas + guard de auth
-│   ├── App.vue                 # raiz: monta v-app, AppToast, watchers de auth e tema
-│   ├── main.ts                 # bootstrap (aguarda auth resolver antes de mountar)
-│   └── style.css               # CSS vars + glassmorphism + privacy mode
-├── firestore.rules             # regras de segurança Firestore
+│   │   ├── common/                # AppToast, ExportDialog, ImportDialog, Sparkline
+│   │   ├── layout/                # AppLayout (AppBar + NavigationDrawer + FAB mobile)
+│   │   ├── dashboard/             # SummaryCards, CashflowChart, BudgetsCard, NetWorthCard,
+│   │   │                          # CheckingCard, PaymentStatusDonut, UpcomingList
+│   │   ├── insights/              # HealthScoreCard, HealthScoreMini,
+│   │   │                          # MonthComparisonCard, TopExpensesCard, SuggestionsCard
+│   │   ├── transactions/          # TransactionDialog (com recorrência + tags + duplicidade),
+│   │   │                          # TransactionTable
+│   │   ├── expenses/              # ExpenseDialog, ExpenseTable
+│   │   ├── savings/               # SavingsDialog, SavingsCard, NetWorthHistory
+│   │   ├── projects/              # ProjectDialog, ProjectCard
+│   │   └── settings/              # CategoriesManager, BudgetsManager
+│   ├── views/                     # Login, Dashboard, Payable, Receivable, Expenses,
+│   │                              # Savings, Projects, Insights, Settings
+│   ├── stores/                    # auth, transactions, expenses, savings, projects,
+│   │                              # categories, budgets, snapshots, preferences, toast
+│   ├── services/                  # firebase config + Firestore CRUD por entidade
+│   ├── types/                     # interfaces TypeScript
+│   ├── utils/                     # currency, dates, savings, exportExcel, importCsv,
+│   │                              # duplicates, insights
+│   ├── plugins/                   # vuetify (tema flux + flux-light)
+│   ├── router/                    # rotas + guard de auth
+│   ├── App.vue                    # raiz: monta v-app, AppToast, watchers de auth e tema
+│   ├── main.ts                    # bootstrap (aguarda auth resolver antes de mountar)
+│   └── style.css                  # CSS vars + glassmorphism + privacy mode
+├── firestore.rules                # regras de segurança Firestore
 ├── firestore.indexes.json
-├── firebase.json               # hosting + firestore + headers COOP
+├── firebase.json                  # hosting + firestore + headers COOP
 ├── .firebaserc
-├── .env.example                # template (sem chaves reais)
+├── .env.example                   # template (sem chaves reais)
 ├── .gitignore
-├── vite.config.ts              # plugins Vue, Vuetify, PWA + headers dev
+├── vite.config.ts                 # plugins Vue, Vuetify, PWA + headers dev
 ├── tsconfig*.json
 └── package.json
 ```
@@ -251,20 +291,20 @@ fluxPay/
 
 Tudo é **single-tenant por usuário**: cada usuário só lê/escreve embaixo da própria subárvore.
 
-```
-users/{uid}                     # perfil: displayName, email, photoURL, settings
-├── transactions/{id}           # contas a pagar e receber (campo `type`)
-├── expenses/{id}               # gastos avulsos
-├── savings/{id}                # patrimônio (conta corrente, CDB, etc)
-├── projects/{id}               # metas
-├── categories/{id}             # categorias customizadas
-├── budgets/{id}                # orçamentos por categoria
-└── networthSnapshots/{yyyy-mm} # histórico mensal do patrimônio
+```text
+users/{uid}                        # perfil: displayName, email, photoURL, settings
+├── transactions/{id}              # contas a pagar e receber (campo `type`, `recurring`, `tags`)
+├── expenses/{id}                  # gastos avulsos (campo `tags`)
+├── savings/{id}                   # patrimônio (conta corrente, CDB, etc.)
+├── projects/{id}                  # metas
+├── categories/{id}                # categorias customizadas
+├── budgets/{id}                   # orçamentos por categoria
+└── networthSnapshots/{yyyy-mm}    # histórico mensal do patrimônio
 ```
 
 ### Regras de segurança
 
-```
+```text
 match /users/{userId} {
   allow read, write: if request.auth != null && request.auth.uid == userId;
   match /{document=**} {
@@ -296,7 +336,7 @@ Tudo funciona dentro do plano gratuito do Firebase:
 - ✅ Hosting (10 GB armazenamento, 360 MB/dia transferência)
 
 **O que NÃO usa:** Cloud Storage (anexos de comprovante), Cloud Functions, Cloud Messaging.
-Por isso o app não tem upload de imagens/PDFs — é uma escolha consciente de continuar gratuito.
+Por isso o app não tem upload de imagens/PDFs nem push notifications nativas — é uma escolha consciente de continuar gratuito.
 
 ---
 
@@ -307,6 +347,7 @@ Por isso o app não tem upload de imagens/PDFs — é uma escolha consciente de 
 - **API key do Firebase é pública por design** (vai pro bundle do client de qualquer jeito) — o que protege o acesso são as regras do Firestore + restrições de domínio no Console.
 - **Modo privacidade**: borra todos os valores quando você compartilha tela / faz screenshot.
 - **Service accounts e credenciais administrativas** são bloqueadas no `.gitignore` (`*serviceAccount*.json`, `firebase-adminsdk-*.json`).
+- **Detecção de duplicidade**: protege contra cliques acidentais que criariam o mesmo lançamento duas vezes.
 
 ---
 
@@ -314,16 +355,15 @@ Por isso o app não tem upload de imagens/PDFs — é uma escolha consciente de 
 
 Ideias futuras (não implementadas):
 
-- [ ] Comparativo mês a mês com % de variação
-- [ ] Top 5 maiores gastos do mês
-- [ ] Score de saúde financeira
-- [ ] Sugestões de economia baseadas em padrões
 - [ ] Importar OFX (extratos bancários)
-- [ ] Calendar feed (.ics) com vencimentos
-- [ ] Tags livres além de categoria
-- [ ] Detecção de duplicidade ao salvar
+- [ ] Transferência entre contas (sair de uma savings, entrar em outra)
+- [ ] Calendar feed (.ics) com vencimentos no Google Agenda
+- [ ] Parcelamento automático (1/12, 2/12, ...)
 - [ ] Notificações push (FCM) — exige plano Blaze
-- [ ] Conta familiar (compartilhar dados entre membros)
+- [ ] Conta familiar / compartilhada (multi-usuário)
+- [ ] Atalhos de teclado + comando palette (Ctrl+K)
+- [ ] Multi-moeda com cotação automática
+- [ ] Reconciliação de extrato bancário
 
 ---
 

@@ -86,7 +86,7 @@ const handleDeleteSeries = async (tx: Transaction) => {
     class="flux-table"
   >
     <template #[`item.description`]="{ item }">
-      <div class="d-flex align-center">
+      <div class="d-flex align-center flex-wrap" style="gap: 4px">
         <span>{{ item.description }}</span>
         <v-tooltip v-if="item.recurring" location="top">
           <template #activator="{ props: tipProps }">
@@ -95,12 +95,20 @@ const handleDeleteSeries = async (tx: Transaction) => {
               icon="mdi-repeat-variant"
               size="14"
               color="primary"
-              class="ml-2"
             />
           </template>
           {{ item.recurring.occurrence }}/{{ item.recurring.total }}
           ({{ item.recurring.frequency === 'weekly' ? 'semanal' : item.recurring.frequency === 'monthly' ? 'mensal' : 'anual' }})
         </v-tooltip>
+        <v-chip
+          v-for="tag in item.tags || []"
+          :key="tag"
+          size="x-small"
+          variant="outlined"
+          class="tag-chip"
+        >
+          #{{ tag }}
+        </v-chip>
       </div>
     </template>
 
@@ -186,5 +194,13 @@ const handleDeleteSeries = async (tx: Transaction) => {
 .font-mono {
   font-family: 'Space Grotesk', monospace;
   font-feature-settings: 'tnum';
+}
+
+.tag-chip {
+  font-size: 0.65rem !important;
+  height: 18px !important;
+  opacity: 0.75;
+  border-color: rgba(0, 186, 180, 0.4) !important;
+  color: #00BAB4 !important;
 }
 </style>
