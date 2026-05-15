@@ -9,7 +9,9 @@ import {
   type ChartOptions,
 } from 'chart.js'
 import { useTransactionsStore } from '../../stores/transactions'
+import { usePreferencesStore } from '../../stores/preferences'
 import { formatCurrency } from '../../utils/currency'
+import { getMonthRange, formatMonth } from '../../utils/dates'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
@@ -30,12 +32,18 @@ const arcGlowPlugin = {
 ChartJS.register(arcGlowPlugin)
 
 const txStore = useTransactionsStore()
+const prefs = usePreferencesStore()
+
+const monthRange = computed(() => getMonthRange(new Date(), prefs.monthStartDay))
+const monthLabel = computed(() => formatMonth(monthRange.value.start))
 
 const buckets = computed(() => {
   let paid = 0
   let pending = 0
   let overdue = 0
+  const { start, end } = monthRange.value
   for (const t of txStore.transactions) {
+    if (t.dueDate < start || t.dueDate > end) continue
     if (t.status === 'paid') paid += t.amount
     else if (t.status === 'overdue') overdue += t.amount
     else pending += t.amount
@@ -110,7 +118,7 @@ const legend = computed(() => [
       <div class="title-marker mr-3"></div>
       <div>
         <div class="text-caption text-uppercase" style="letter-spacing: 0.12em; color: #8E94B0">
-          Status
+          Status · {{ monthLabel }}
         </div>
         <div style="font-family: 'Space Grotesk'; letter-spacing: -0.01em; font-size: 1.1rem; font-weight: 600">
           Pago vs pendente
@@ -149,7 +157,7 @@ const legend = computed(() => [
       <div v-else class="text-center py-8">
         <v-icon size="48" color="primary" style="opacity: 0.5">mdi-chart-donut</v-icon>
         <div class="text-body-2 mt-2" style="color: #8E94B0">
-          Sem transações cadastradas ainda
+          Sem transações em {{ monthLabel }}
         </div>
       </div>
     </v-card-text>
