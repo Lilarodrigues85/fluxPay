@@ -6,6 +6,7 @@ import {
   createExpense as createEx,
   updateExpense as updateEx,
   deleteExpense as deleteEx,
+  reconcileExpenses as reconcileEx,
 } from '../services/expenses.service'
 import { getMonthRange } from '../utils/dates'
 import { usePreferencesStore } from './preferences'
@@ -66,10 +67,26 @@ export const useExpensesStore = defineStore('expenses', () => {
   const create = (userId: string, data: Omit<Expense, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) =>
     createEx(userId, data)
 
-  const update = (userId: string, id: string, data: Partial<Expense>) =>
-    updateEx(userId, id, data)
+  const update = (userId: string, id: string, data: Partial<Expense>) => {
+    const old = items.value.find((e) => e.id === id)
+    if (!old) throw new Error('Gasto não encontrado')
+    return updateEx(userId, id, old, data)
+  }
 
-  const remove = (userId: string, id: string) => deleteEx(userId, id)
+  const remove = (userId: string, id: string) => {
+    const old = items.value.find((e) => e.id === id)
+    return deleteEx(userId, id, old)
+  }
+
+  const reconcile = (userId: string, expensesToLink: Expense[], accountId: string) =>
+    reconcileEx(userId, expensesToLink, accountId)
+
+  // Gastos não-Crédito sem vínculo de conta — candidatos a reconciliação
+  const unlinkedExpenses = computed(() =>
+    items.value.filter(
+      (e) => e.paymentMethod !== 'Crédito' && !e.linkedAccountId
+    )
+  )
 
   return {
     items,
@@ -78,10 +95,12 @@ export const useExpensesStore = defineStore('expenses', () => {
     todayTotal,
     monthCount,
     dailyAvg,
+    unlinkedExpenses,
     subscribe,
     unsubscribeAll,
     create,
     update,
     remove,
+    reconcile,
   }
 })

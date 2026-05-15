@@ -108,6 +108,7 @@ export interface Expense {
   paymentMethod: string
   notes: string
   tags?: string[]
+  linkedAccountId?: string | null  // id da Savings (conta corrente) debitada — null se Crédito ou não vinculado
   createdAt: number
   updatedAt: number
 }

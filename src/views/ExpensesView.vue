@@ -6,22 +6,90 @@ import ExpenseDialog from '../components/expenses/ExpenseDialog.vue'
 import ExpenseTable from '../components/expenses/ExpenseTable.vue'
 import ExportDialog from '../components/common/ExportDialog.vue'
 import ImportDialog from '../components/common/ImportDialog.vue'
+import { useAuthStore } from '../stores/auth'
 import { useExpensesStore } from '../stores/expenses'
 import { useSavingsStore } from '../stores/savings'
+import { useToastStore } from '../stores/toast'
 import { formatCurrency } from '../utils/currency'
-import { formatDate } from '../utils/dates'
+import { formatDate, getMonthRange } from '../utils/dates'
+import { usePreferencesStore } from '../stores/preferences'
 import type { Expense } from '../types'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 const expensesStore = useExpensesStore()
 const savingsStore = useSavingsStore()
+const toast = useToastStore()
+const prefs = usePreferencesStore()
 
 const dialogOpen = ref(false)
 const exportOpen = ref(false)
 const importOpen = ref(false)
 const editingExpense = ref<Expense | null>(null)
 const filterCategory = ref<string>('all')
+
+// Reconciliação retroativa
+const reconcileOpen = ref(false)
+const reconcileScope = ref<'month' | 'all'>('month')
+const reconcileAccountId = ref<string | null>(null)
+const isReconciling = ref(false)
+
+const unlinkedThisMonth = computed(() => {
+  const { start, end } = getMonthRange(new Date(), prefs.monthStartDay)
+  return expensesStore.unlinkedExpenses.filter((e) => e.date >= start && e.date <= end)
+})
+
+const unlinkedTotalThisMonth = computed(() =>
+  unlinkedThisMonth.value.reduce((s, e) => s + e.amount, 0)
+)
+
+const reconcileTargetItems = computed(() =>
+  reconcileScope.value === 'month' ? unlinkedThisMonth.value : expensesStore.unlinkedExpenses
+)
+
+const reconcileTargetTotal = computed(() =>
+  reconcileTargetItems.value.reduce((s, e) => s + e.amount, 0)
+)
+
+const accountOptions = computed(() =>
+  savingsStore.checkingItems.map((c) => ({
+    title: c.institution ? `${c.name} (${c.institution})` : c.name,
+    value: c.id,
+    subtitle: `Saldo atual: ${formatCurrency(c.amount)}`,
+  }))
+)
+
+const openReconcile = () => {
+  reconcileScope.value = 'month'
+  reconcileAccountId.value = savingsStore.checkingItems.length > 0
+    ? savingsStore.checkingItems[0].id
+    : null
+  reconcileOpen.value = true
+}
+
+const handleReconcile = async () => {
+  if (!authStore.user || !reconcileAccountId.value) return
+  if (reconcileTargetItems.value.length === 0) {
+    toast.info('Nenhum gasto pra reconciliar')
+    reconcileOpen.value = false
+    return
+  }
+  isReconciling.value = true
+  try {
+    const result = await expensesStore.reconcile(
+      authStore.user.uid,
+      reconcileTargetItems.value,
+      reconcileAccountId.value
+    )
+    toast.success(`${result.count} gastos vinculados · ${formatCurrency(result.total)} debitado`)
+    reconcileOpen.value = false
+  } catch (err) {
+    toast.error('Erro: ' + (err as Error).message)
+  } finally {
+    isReconciling.value = false
+  }
+}
 
 const checkingAccounts = computed(() =>
   savingsStore.items.filter((s) => s.type === 'checking')
@@ -204,6 +272,28 @@ watch(() => route.query.new, (v) => { if (v) openNew() }, { immediate: true })
         </v-col>
       </v-row>
 
+      <v-alert
+        v-if="unlinkedThisMonth.length > 0 && savingsStore.checkingItems.length > 0"
+        color="warning"
+        variant="tonal"
+        density="comfortable"
+        class="mb-4 reconcile-alert"
+        icon="mdi-link-off"
+      >
+        <div class="d-flex flex-column flex-md-row align-md-center ga-2">
+          <div class="flex-grow-1">
+            <strong>{{ unlinkedThisMonth.length }} gasto(s) deste mês ainda não foram debitados</strong>
+            <div class="text-caption mt-1">
+              Total: <span class="font-mono money-value">{{ formatCurrency(unlinkedTotalThisMonth) }}</span> ·
+              esses gastos foram registrados antes do vínculo automático com conta corrente
+            </div>
+          </div>
+          <v-btn color="warning" variant="flat" @click="openReconcile" prepend-icon="mdi-link-variant">
+            Reconciliar
+          </v-btn>
+        </div>
+      </v-alert>
+
       <v-card class="glass-card pa-4">
         <v-select
           v-model="filterCategory"
@@ -220,6 +310,99 @@ watch(() => route.query.new, (v) => { if (v) openNew() }, { immediate: true })
       <ExpenseDialog v-model="dialogOpen" :expense="editingExpense" />
       <ExportDialog v-model="exportOpen" scope="expenses" />
       <ImportDialog v-model="importOpen" scope="expenses" />
+
+      <v-dialog v-model="reconcileOpen" max-width="560" :persistent="isReconciling">
+        <v-card class="glass-card">
+          <v-card-title class="d-flex align-center pa-4">
+            <div class="dialog-icon mr-3">
+              <v-icon icon="mdi-link-variant" color="warning" />
+            </div>
+            <span style="font-family: 'Space Grotesk'; letter-spacing: -0.01em">
+              Reconciliar gastos antigos
+            </span>
+          </v-card-title>
+
+          <v-card-text>
+            <p class="text-body-2 mb-4" style="color: var(--text-muted)">
+              Vincula gastos existentes (não-Crédito, sem conta vinculada) a uma conta corrente
+              e debita o total do saldo. Use uma única vez pra alinhar gastos antigos.
+            </p>
+
+            <div class="text-caption text-uppercase mb-2" style="letter-spacing: 0.08em; color: #8E94B0">
+              Período a reconciliar
+            </div>
+            <v-btn-toggle v-model="reconcileScope" mandatory color="warning" divided class="mb-4 d-flex">
+              <v-btn value="month" class="flex-grow-1">
+                Só este mês ({{ unlinkedThisMonth.length }})
+              </v-btn>
+              <v-btn value="all" class="flex-grow-1">
+                Todos sem vínculo ({{ expensesStore.unlinkedExpenses.length }})
+              </v-btn>
+            </v-btn-toggle>
+
+            <v-select
+              v-model="reconcileAccountId"
+              :items="accountOptions"
+              item-title="title"
+              item-value="value"
+              label="Debitar de qual conta corrente?"
+              prepend-inner-icon="mdi-bank-outline"
+              class="mb-3"
+            >
+              <template #item="{ props: itemProps, item }">
+                <v-list-item
+                  v-bind="itemProps"
+                  :subtitle="((item as unknown as { raw: { subtitle?: string } }).raw?.subtitle) || ''"
+                />
+              </template>
+            </v-select>
+
+            <div class="summary-box pa-3">
+              <div class="d-flex justify-space-between mb-1">
+                <span class="text-body-2">Gastos a vincular</span>
+                <span class="font-mono"><strong>{{ reconcileTargetItems.length }}</strong></span>
+              </div>
+              <div class="d-flex justify-space-between mb-1">
+                <span class="text-body-2">Total a debitar</span>
+                <span class="font-mono money-value" style="color: #FF4D6D">
+                  − {{ formatCurrency(reconcileTargetTotal) }}
+                </span>
+              </div>
+              <v-divider class="my-2" style="border-color: rgba(62, 121, 150, 0.2)" />
+              <div v-if="reconcileAccountId" class="d-flex justify-space-between">
+                <span class="text-body-2">Saldo após reconciliar</span>
+                <span class="font-mono money-value" :style="{
+                  color: ((savingsStore.checkingItems.find(c => c.id === reconcileAccountId)?.amount || 0) - reconcileTargetTotal) < 0 ? '#FF4D6D' : '#00BAB4'
+                }">
+                  {{ formatCurrency((savingsStore.checkingItems.find(c => c.id === reconcileAccountId)?.amount || 0) - reconcileTargetTotal) }}
+                </span>
+              </div>
+            </div>
+
+            <p class="text-caption mt-3 mb-0" style="color: var(--text-muted)">
+              <v-icon size="14" class="mr-1" color="warning">mdi-alert-outline</v-icon>
+              Isso é uma operação irreversível. Use só se o saldo da conta corrente
+              ainda não reflete esses gastos.
+            </p>
+          </v-card-text>
+
+          <v-card-actions class="pa-4">
+            <v-spacer />
+            <v-btn variant="text" :disabled="isReconciling" @click="reconcileOpen = false">
+              Cancelar
+            </v-btn>
+            <v-btn
+              color="warning"
+              :loading="isReconciling"
+              :disabled="!reconcileAccountId || reconcileTargetItems.length === 0"
+              prepend-icon="mdi-check"
+              @click="handleReconcile"
+            >
+              Confirmar débito
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-container>
   </AppLayout>
 </template>
@@ -294,5 +477,27 @@ watch(() => route.query.new, (v) => { if (v) openNew() }, { immediate: true })
 
 .font-mono {
   font-family: 'Space Grotesk', monospace;
+  font-feature-settings: 'tnum';
+}
+
+.reconcile-alert {
+  border: 1px solid rgba(244, 162, 97, 0.3);
+}
+
+.dialog-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(244, 162, 97, 0.18), rgba(244, 162, 97, 0.05));
+  border: 1px solid rgba(244, 162, 97, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-box {
+  background: rgba(15, 16, 35, 0.5);
+  border: 1px solid rgba(62, 121, 150, 0.2);
+  border-radius: 10px;
 }
 </style>
